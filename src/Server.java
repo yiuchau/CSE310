@@ -12,7 +12,7 @@ import java.util.Iterator;
  */
 public class Server {
 
-    public static final HashMap<String, Record> records = new HashMap<>();
+    public static final HashMap<Record, String> records = new HashMap<>();
 
     public static class TCPSocket extends Thread {
         private Socket socket;
@@ -41,7 +41,6 @@ public class Server {
 
                     String [] tokens = clientSentence.split("[ ]+");
 
-                    System.out.println(tokens.length);
                     // Process command according to protocol
                     switch (tokens[0]){
                         case "EXIT":
@@ -61,9 +60,9 @@ public class Server {
                             synchronized (records) {
                                 System.out.println("Retrieving records");
 
-                                Record record = new Record(tokens[1], Record.Type.valueOf(tokens[2]), tokens[3]);
+                                Record record = new Record(tokens[1], Record.Type.valueOf(tokens[2]));
 
-                                records.put(tokens[1], record);
+                                records.put(record, tokens[3]);
                             }
 
                             outToClient.writeBytes("Record added\n");
@@ -90,12 +89,12 @@ public class Server {
 
                             synchronized (records) {
                                 StringBuilder output = new StringBuilder();
-                                for (Record record : records.values()) {
+                                for (Record record : records.keySet()) {
                                     output.append(record.getName());
                                     output.append(" ");
                                     output.append(record.getType());
                                     output.append(" ");
-                                    output.append(record.getValue());
+                                    output.append(records.get(record));
                                     output.append("\n");
                                 }
 
