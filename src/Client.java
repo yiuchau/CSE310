@@ -128,8 +128,9 @@ class Client {
                             if(tokens.length == 3){
                                 sentence =  "GET " + tokens[1] + " " + tokens[2];
 
-                                // Send the sentence read to the server
-                                outToServer.writeBytes(sentence + "\r\n");
+                                outToServer.writeBytes("Method: GET\n");
+                                outToServer.writeBytes("Name: " + tokens[1] + "\n");
+                                outToServer.writeBytes("Type: " + tokens[2] + "\n");
     
                                 // Get the reply from the server
                                 modifiedSentence = inFromServer.readLine();
@@ -174,8 +175,9 @@ class Client {
                             if(tokens.length == 3){
                                 sentence =  "DEL " + tokens[1] + " " + tokens[2];
 
-                                // Send the sentence read to the server
-                                outToServer.writeBytes(sentence + "\r\n");
+                                outToServer.writeBytes("Method: DEL\n");
+                                outToServer.writeBytes("Name: " + tokens[1] + "\n");
+                                outToServer.writeBytes("Type: " + tokens[2] + "\n");
     
                                 // Get the reply from the server
                                 modifiedSentence = inFromServer.readLine();

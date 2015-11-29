@@ -25,15 +25,6 @@ public class Server {
 
     public static final HashMap<String, String> records = new HashMap<>();
 
-    /**
-     * Get the value from a String formatted as Key: Value
-     * @param line line to get the value from
-     * @return the value
-     */
-    private static String getValue(String line) {
-        return line.split("\\s+")[1];
-    }
-
     public static class TCPSocket extends Thread {
         private Socket socket;
 
@@ -57,13 +48,11 @@ public class Server {
 
                 boolean closed = false;
 
-                String[] tokens = {"","","",""};
-
                 while ((methodName = inFromClient.readLine()) != null) {
 
                     System.out.println("Received: " + methodName);
 
-                    methodName = getValue(methodName);
+                    methodName = methodName.split("\\s+")[1];
 
                     // Process command according to protocol
                     switch (methodName){
@@ -86,6 +75,12 @@ public class Server {
                             String type = "";
                             String value = "";
 
+                            /*
+                                Method: PUT
+                                Name: google.com
+                                Type: NS
+                                Value: 127.0.0.1
+                             */
                             for (int i = 0; i < 3; i++) {
                                 String[] line = inFromClient.readLine().split(":\\s+");
 
@@ -126,8 +121,29 @@ public class Server {
                             d. Returns not found error message if not found
                         */
 
+                            name = "";
+                            type = "";
+
+                            /*
+                                Method: GET
+                                Name: google.com
+                                Type: NS
+                             */
+                            for (int i = 0; i < 2; i++) {
+                                String[] line = inFromClient.readLine().split(":\\s+");
+
+                                switch (line[0]) {
+                                    case "Name":
+                                        name = line[1];
+                                        break;
+                                    case "Type":
+                                        type = line[1];
+                                        break;
+                                }
+                            }
+
                             synchronized (records) {
-                                String record = records.get(tokens[1] + " " + tokens[2]);
+                                String record = records.get(name + " " + type);
 
                                 outToClient.writeBytes(record == null ?
                                         "Record not found\n" :
@@ -164,13 +180,44 @@ public class Server {
 
                             break;
 
-                        case "del":
+                        case "DEL":
                         /*  del:
                             a. Server removes a name record from database
                             b. Two arguments: name, type
                             c. If found, removes record and sends positive feedback
                             d. Returns not found error message otherwise
                         */
+
+                            name = "";
+                            type = "";
+
+                            /*
+                                Method: GET
+                                Name: google.com
+                                Type: NS
+                             */
+                            for (int i = 0; i < 2; i++) {
+                                String[] line = inFromClient.readLine().split(":\\s+");
+
+                                switch (line[0]) {
+                                    case "Name":
+                                        name = line[1];
+                                        break;
+                                    case "Type":
+                                        type = line[1];
+                                        break;
+                                }
+                            }
+
+                            synchronized (records) {
+                                String record = records.remove(name + " " + type);
+
+                                outToClient.writeBytes(record == null ?
+                                        "Record not found\n" :
+                                        "Record deleted successfully\n"
+                                );
+                            }
+
                             break;
                     }
 
