@@ -57,8 +57,13 @@ public class Server {
                             c. Server records the new entry for name/type, or updates old entry
                         */
 
+                            if (!tokens[2].equals("NS") && !tokens[2].equals("A")) {
+                                outToClient.writeBytes("Invalid record type\n");
+                                break;
+                            }
+
                             synchronized (records) {
-                                System.out.println("Retrieving records");
+                                System.out.println("Adding or updating record");
 
                                 records.put(tokens[1] + " " + tokens[2], tokens[3]);
                             }
@@ -76,7 +81,14 @@ public class Server {
                             d. Returns not found error message if not found
                         */
 
+                            synchronized (records) {
+                                String record = records.get(tokens[1] + " " + tokens[2]);
 
+                                outToClient.writeBytes(record == null ?
+                                        "Record not found\n" :
+                                        record + "\n"
+                                );
+                            }
 
                             break;
 

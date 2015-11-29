@@ -63,11 +63,12 @@ class Client {
 
                 // Read in lines from input
                 while (true){
+                    System.out.print("> ");
                     sentence = inFromUser.readLine();
                     // Parse input string
                     String [] tokens = sentence.split("[ ]+");
-                    for (int i = 0; i < tokens.length; i++)
-                        System.out.println(tokens[i]);
+//                    for (String token : tokens)
+//                        System.out.println(token);
                     // Process command according to protocol
                     switch (tokens[0]){
                         case "exit":
@@ -171,6 +172,9 @@ class Client {
                         //  Print list of supported commands, function, syntax
                         printHelp();
                     }
+
+                    // newline for readability
+                    System.out.println();
                     
                 }
                 
