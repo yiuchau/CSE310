@@ -82,9 +82,25 @@ public class Server {
                             c. Server records the new entry for name/type, or updates old entry
                         */
 
-                            String name = getValue(inFromClient.readLine());
-                            String type = getValue(inFromClient.readLine());
-                            String value = getValue(inFromClient.readLine());
+                            String name = "";
+                            String type = "";
+                            String value = "";
+
+                            for (int i = 0; i < 3; i++) {
+                                String[] line = inFromClient.readLine().split(":\\s+");
+
+                                switch (line[0]) {
+                                    case "Name":
+                                        name = line[1];
+                                        break;
+                                    case "Type":
+                                        type = line[1];
+                                        break;
+                                    case "Value":
+                                        value = line[1];
+                                        break;
+                                }
+                            }
 
                             if (!type.equals("NS") && !type.equals("A")) {
                                 outToClient.writeBytes("Invalid record type\n");
