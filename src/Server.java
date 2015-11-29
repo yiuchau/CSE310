@@ -12,7 +12,7 @@ import java.util.Iterator;
  */
 public class Server {
 
-    public static final HashMap<Record, String> records = new HashMap<>();
+    public static final HashMap<String, String> records = new HashMap<>();
 
     public static class TCPSocket extends Thread {
         private Socket socket;
@@ -60,9 +60,7 @@ public class Server {
                             synchronized (records) {
                                 System.out.println("Retrieving records");
 
-                                Record record = new Record(tokens[1], Record.Type.valueOf(tokens[2]));
-
-                                records.put(record, tokens[3]);
+                                records.put(tokens[1] + " " + tokens[2], tokens[3]);
                             }
 
                             outToClient.writeBytes("Record added\n");
@@ -77,6 +75,9 @@ public class Server {
                             c. Server returns record value if found
                             d. Returns not found error message if not found
                         */
+
+
+
                             break;
 
                         case "BROWSE":
@@ -89,10 +90,8 @@ public class Server {
 
                             synchronized (records) {
                                 StringBuilder output = new StringBuilder();
-                                for (Record record : records.keySet()) {
-                                    output.append(record.getName());
-                                    output.append(" ");
-                                    output.append(record.getType());
+                                for (String record : records.keySet()) {
+                                    output.append(record);
                                     output.append(" ");
                                     output.append(records.get(record));
                                     output.append("\n");
@@ -101,6 +100,9 @@ public class Server {
                                 System.out.println(output);
 
                                 outToClient.writeBytes(output.toString());
+
+                                // client struggled with multiple lines so END used as a stop sequence
+                                outToClient.writeBytes("END\n");
                             }
 
                             break;
@@ -114,6 +116,9 @@ public class Server {
                         */
                             break;
                     }
+
+                    // for readability
+                    System.out.println();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

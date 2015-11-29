@@ -138,7 +138,7 @@ class Client {
                             // Get the reply from the server
                             // Print the returned sentence
                             System.out.println("FROM SERVER: ");
-                            while((modifiedSentence = inFromServer.readLine()) != null){
+                            while(!(modifiedSentence = inFromServer.readLine()).equals("END")){
                                 System.out.println(lineNumber + " " + modifiedSentence);
                                 lineNumber++;
                             }
