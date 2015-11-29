@@ -8,11 +8,31 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * Working on dealing with concurrency
+ * Server
+ *
+ * Request messages:
+ * Method: PUT/GET/BROWSE/DEL/EXIT
+ * Name: test.com
+ * Type: A/NS
+ * Value: 192.168.1.1
+ *
+ * Response message:
+ * Status: OK/FAIL
+ * Response: 192.168.1.1 (value of record)
+ *
  */
 public class Server {
 
     public static final HashMap<String, String> records = new HashMap<>();
+
+    /**
+     * Get the value from a String formatted as Key: Value
+     * @param line line to get the value from
+     * @return the value
+     */
+    private static String getValue(String line) {
+        return line.split("\\s+")[1];
+    }
 
     public static class TCPSocket extends Thread {
         private Socket socket;
@@ -33,21 +53,26 @@ public class Server {
                 DataOutputStream outToClient =
                         new DataOutputStream(socket.getOutputStream());
 
-                String clientSentence, serverResponse;
+                String methodName, serverResponse;
 
-                while ((clientSentence = inFromClient.readLine()) != null) {
+                boolean closed = false;
 
-                    System.out.println("Received: " + clientSentence);
+                String[] tokens = {"","","",""};
 
-                    String [] tokens = clientSentence.split("[ ]+");
+                while ((methodName = inFromClient.readLine()) != null) {
+
+                    System.out.println("Received: " + methodName);
+
+                    methodName = getValue(methodName);
 
                     // Process command according to protocol
-                    switch (tokens[0]){
+                    switch (methodName){
                         case "EXIT":
                             System.out.println("Closing connection socket for client at Address:Port " +
                                     socket.getRemoteSocketAddress().toString());
 
                             socket.close();
+                            closed = true;
                             break;
                         case "PUT":
                         /*
@@ -57,7 +82,11 @@ public class Server {
                             c. Server records the new entry for name/type, or updates old entry
                         */
 
-                            if (!tokens[2].equals("NS") && !tokens[2].equals("A")) {
+                            String name = getValue(inFromClient.readLine());
+                            String type = getValue(inFromClient.readLine());
+                            String value = getValue(inFromClient.readLine());
+
+                            if (!type.equals("NS") && !type.equals("A")) {
                                 outToClient.writeBytes("Invalid record type\n");
                                 break;
                             }
@@ -65,7 +94,7 @@ public class Server {
                             synchronized (records) {
                                 System.out.println("Adding or updating record");
 
-                                records.put(tokens[1] + " " + tokens[2], tokens[3]);
+                                records.put(name + " " + type, value);
                             }
 
                             outToClient.writeBytes("Record added\n");
@@ -131,6 +160,10 @@ public class Server {
 
                     // for readability
                     System.out.println();
+
+                    // closed socket
+                    if (closed)
+                        break;
                 }
             } catch (IOException e) {
                 e.printStackTrace();

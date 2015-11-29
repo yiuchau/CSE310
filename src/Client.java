@@ -7,7 +7,19 @@ import java.io.*; // Provides for system input and output through data
 import java.net.*; // Provides the classes for implementing networking 
                    // applications
 
-// TCP Client class
+/**
+ *
+ * TCP Client
+ *
+ * Request messages:
+ * Method: PUT/GET/BROWSE/DEL/EXIT
+ * Name: test.com
+ * Type: A/NS
+ *
+ * Response message:
+ * Status: OK/FAIL
+ * Response: 192.168.1.1 (value of record)
+ */
 class Client {
         public static void printHelp(){
              System.out.println(
@@ -73,7 +85,7 @@ class Client {
                     switch (tokens[0]){
                         case "exit":
                             // Write exit to server so the server closes the socket
-                            outToServer.writeBytes("EXIT\r\n");
+                            outToServer.writeBytes("Method: EXIT\r\n");
 
                             // close the socket
                             clientSocket.close();
@@ -89,7 +101,12 @@ class Client {
                                 sentence =  "PUT " + tokens[1] + " " + tokens[2] + " " + tokens[3];
                                 
                                 // send the sentence read to the server
-                                outToServer.writeBytes(sentence + "\r\n");
+//                                outToServer.writeBytes(sentence + "\r\n");
+
+                                outToServer.writeBytes("Method: PUT\n");
+                                outToServer.writeBytes("Name: " + tokens[1] + "\n");
+                                outToServer.writeBytes("Type: " + tokens[2] + "\n");
+                                outToServer.writeBytes("Value: " + tokens[3] + "\n");
     
                                 // get the reply from the server
                                 modifiedSentence = inFromServer.readLine();
@@ -131,7 +148,7 @@ class Client {
                             d. If database is empty, return a database is empty error
                         */
                             if(tokens.length == 1){
-                                sentence = "BROWSE";
+                                sentence = "Method: BROWSE";
                             int lineNumber = 1;
                             // Send the sentence read to the server
                             outToServer.writeBytes(sentence + "\r\n");
