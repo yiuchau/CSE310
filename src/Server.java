@@ -1,9 +1,13 @@
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -26,7 +30,7 @@ import java.util.Iterator;
  */
 public class Server {
 
-    public static final HashMap<String, String> records = new HashMap<>();
+    public static HashMap<String, String> records = new HashMap<>();
 
     public static class TCPSocket extends Thread {
         private Socket socket;
@@ -241,8 +245,22 @@ public class Server {
                     System.out.println();
 
                     // closed socket
-                    if (closed)
+                    if (closed){
+                        
+                        try {
+                            FileOutputStream fileOut
+                                    = new FileOutputStream("records.ser");
+                            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                            out.writeObject(records);
+                            out.close();
+                            fileOut.close();
+                            System.out.printf("Serialized data is saved in records.ser");
+                        } catch (IOException i) {
+                            i.printStackTrace();
+                        }
                         break;
+                    }
+                        
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -250,33 +268,36 @@ public class Server {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void main(String[] argv) throws Exception {
 
 
         // create a server socket (TCP)
-        ServerSocket welcomeSocket = new ServerSocket(10000);
+        ServerSocket welcomeSocket = new ServerSocket(0);
         System.out.println("Server is at port: " + welcomeSocket.getLocalPort());
         
         String line = null;
         
         try {
             
-            URL path = Server.class.getResource("records.txt");
-            File file = new File(path.getFile());
+            URL path = Server.class.getResource("records.ser");
             
-            if(file.exists()){
-                System.out.println("Records read from file.");
-                FileReader fileReader = new FileReader(file);
-                BufferedReader bufferedReader = new BufferedReader(fileReader);
-            
-                while((line = bufferedReader.readLine()) != null) {
-                    String[] token = line.split("[ ]+");
-                    records.put(token[0] + " " + token[1], token[2]);
-                }
-            
-                bufferedReader.close();
+            if(path != null){
+                File file = new File(path.getFile());
+
+                if (file.exists()) {
+                    System.out.println("Records read from file.");
+                    FileInputStream fis = new FileInputStream(file);
+                    ObjectInputStream ois = new ObjectInputStream(fis);
+
+                    records = (HashMap<String, String>) ois.readObject();
+
+                    ois.close();
+                    fis.close();
+                }  
             }
             
+           
         }
         catch(IOException e) {
             e.printStackTrace();
