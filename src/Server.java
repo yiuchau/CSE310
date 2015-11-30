@@ -1,9 +1,12 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -253,7 +256,32 @@ public class Server {
         // create a server socket (TCP)
         ServerSocket welcomeSocket = new ServerSocket(10000);
         System.out.println("Server is at port: " + welcomeSocket.getLocalPort());
-
+        
+        String line = null;
+        
+        try {
+            
+            URL path = Server.class.getResource("records.txt");
+            File file = new File(path.getFile());
+            
+            if(file.exists()){
+                System.out.println("Records read from file.");
+                FileReader fileReader = new FileReader(file);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+            
+                while((line = bufferedReader.readLine()) != null) {
+                    String[] token = line.split("[ ]+");
+                    records.put(token[0] + " " + token[1], token[2]);
+                }
+            
+                bufferedReader.close();
+            }
+            
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
+        
         // loop infinitely (process clients sequentially)
         while (true) {
             // Wait and accept client connection
