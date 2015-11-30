@@ -21,8 +21,8 @@ import java.net.*; // Provides the classes for implementing networking
  * Response: 192.168.1.1 (value of record)
  */
 class Client {
-        /** flag indicating whether a command is valid or not */
-        public static boolean validCmd = true;
+        /** flag indicating whether a command is valid or not, connection is open or closed */
+        public static boolean validCmd = true, closed = false;
 
         public static void printHelp(){
 
@@ -99,6 +99,7 @@ class Client {
 
                             // close the socket
                             clientSocket.close();
+                            closed = true;
                             break;
                         case "put":
                         /*
@@ -204,6 +205,12 @@ class Client {
                         printHelp();
                     }
 
+                    if(closed){
+                        System.out.println("Connection with server terminated.\n");
+                        break;
+                    }
+                        
+                     
                     // don't read response if there wasn't a good cmd to begin with
                     if (validCmd) {
                         String responseCode = inFromServer.readLine().split(":\\s+")[1];
@@ -235,6 +242,8 @@ class Client {
 
                     // newline for readability
                     System.out.println();
+                    
+                   
                     
                 }
                 
