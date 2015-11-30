@@ -21,7 +21,14 @@ import java.net.*; // Provides the classes for implementing networking
  * Response: 192.168.1.1 (value of record)
  */
 class Client {
+        /** flag indicating whether a command is valid or not */
+        public static boolean validCmd = true;
+
         public static void printHelp(){
+
+            // if help is shown, a command was not sent to the server
+            validCmd = false;
+
              System.out.println(
                             "help:\n" +  
                             "\ta. No arguments\n" +
@@ -73,6 +80,9 @@ class Client {
                 BufferedReader inFromServer = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
 
+                // indicating multiple lines needed
+                boolean browse = false;
+
                 // Read in lines from input
                 while (true){
                     System.out.print("> ");
@@ -109,10 +119,10 @@ class Client {
                                 outToServer.writeBytes("Value: " + tokens[3] + "\n");
     
                                 // get the reply from the server
-                                modifiedSentence = inFromServer.readLine();
-    
-                                // print the returned sentence
-                                System.out.println("FROM SERVER: " + modifiedSentence);
+//                                modifiedSentence = inFromServer.readLine();
+//
+//                                // print the returned sentence
+//                                System.out.println("FROM SERVER: " + modifiedSentence);
                             }else
                                 printHelp();
 
@@ -132,11 +142,11 @@ class Client {
                                 outToServer.writeBytes("Name: " + tokens[1] + "\n");
                                 outToServer.writeBytes("Type: " + tokens[2] + "\n");
     
-                                // Get the reply from the server
-                                modifiedSentence = inFromServer.readLine();
-    
-                                // Print the returned sentence
-                                System.out.println("FROM SERVER: " + modifiedSentence);
+//                                // Get the reply from the server
+//                                modifiedSentence = inFromServer.readLine();
+//
+//                                // Print the returned sentence
+//                                System.out.println("FROM SERVER: " + modifiedSentence);
                             }else
                                 printHelp();
                             break;
@@ -153,14 +163,16 @@ class Client {
                             int lineNumber = 1;
                             // Send the sentence read to the server
                             outToServer.writeBytes(sentence + "\r\n");
+
+                            browse = true;
     
                             // Get the reply from the server
                             // Print the returned sentence
-                            System.out.println("FROM SERVER: ");
-                            while(!(modifiedSentence = inFromServer.readLine()).equals("END")){
-                                System.out.println(lineNumber + " " + modifiedSentence);
-                                lineNumber++;
-                            }
+//                            System.out.println("FROM SERVER: ");
+//                            while(!(modifiedSentence = inFromServer.readLine()).equals("END")){
+//                                System.out.println(lineNumber + " " + modifiedSentence);
+//                                lineNumber++;
+//                            }
                             } else
                                 printHelp();
                             break;
@@ -179,11 +191,11 @@ class Client {
                                 outToServer.writeBytes("Name: " + tokens[1] + "\n");
                                 outToServer.writeBytes("Type: " + tokens[2] + "\n");
     
-                                // Get the reply from the server
-                                modifiedSentence = inFromServer.readLine();
-    
-                                // Print the returned sentence
-                                System.out.println("FROM SERVER: " + modifiedSentence);
+//                                // Get the reply from the server
+//                                modifiedSentence = inFromServer.readLine();
+//
+//                                // Print the returned sentence
+//                                System.out.println("FROM SERVER: " + modifiedSentence);
                             }else
                                 printHelp();
                             break;
@@ -191,6 +203,35 @@ class Client {
                         //  Print list of supported commands, function, syntax
                         printHelp();
                     }
+
+                    // don't read response if there wasn't a good cmd to begin with
+                    if (validCmd) {
+                        String responseCode = inFromServer.readLine().split(":\\s+")[1];
+
+                        if (responseCode.equals("OK")) {
+
+                            if (browse) {
+                                int lines = Integer.parseInt(inFromServer.readLine().split(":\\s+")[1]);
+
+                                for (int i = 0; i < lines; i++) {
+                                    System.out.println(i + " - " + inFromServer.readLine());
+                                }
+
+                                // reset browse flag
+                                browse = false;
+
+                            } else {
+                                String response = inFromServer.readLine().split(":\\s+")[1];
+                                System.out.println("Response - " + response);
+                            }
+                        } else {
+                            String errorMessage = inFromServer.readLine().split(":\\s+")[1];
+                            System.out.println("Error - " + errorMessage);
+                        }
+                    } else {
+                        validCmd = true;
+                    }
+
 
                     // newline for readability
                     System.out.println();

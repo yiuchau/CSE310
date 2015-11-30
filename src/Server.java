@@ -98,7 +98,9 @@ public class Server {
                             }
 
                             if (!type.equals("NS") && !type.equals("A")) {
-                                outToClient.writeBytes("Invalid record type\n");
+
+                                outToClient.writeBytes("Status: FAIL\n");
+                                outToClient.writeBytes("Response: Invalid record type\n");
                                 break;
                             }
 
@@ -108,7 +110,9 @@ public class Server {
                                 records.put(name + " " + type, value);
                             }
 
-                            outToClient.writeBytes("Record added\n");
+
+                            outToClient.writeBytes("Status: OK\n");
+                            outToClient.writeBytes("Response: Record added\n");
 
 
                             break;
@@ -145,9 +149,13 @@ public class Server {
                             synchronized (records) {
                                 String record = records.get(name + " " + type);
 
-                                outToClient.writeBytes(record == null ?
+                                outToClient.writeBytes("Status: " +
+                                        (record == null ? "FAIL\n" : "OK\n")
+                                );
+
+                                outToClient.writeBytes("Response: " + (record == null ?
                                         "Record not found\n" :
-                                        record + "\n"
+                                        record + "\n")
                                 );
                             }
 
@@ -163,6 +171,10 @@ public class Server {
 
                             synchronized (records) {
                                 StringBuilder output = new StringBuilder();
+
+                                outToClient.writeBytes("Status: OK\n");
+                                outToClient.writeBytes("Lines: " + records.size() + "\n");
+
                                 for (String record : records.keySet()) {
                                     output.append(record);
                                     output.append(" ");
@@ -173,9 +185,6 @@ public class Server {
                                 System.out.println(output);
 
                                 outToClient.writeBytes(output.toString());
-
-                                // client struggled with multiple lines so END used as a stop sequence
-                                outToClient.writeBytes("END\n");
                             }
 
                             break;
@@ -192,7 +201,7 @@ public class Server {
                             type = "";
 
                             /*
-                                Method: GET
+                                Method: DEL
                                 Name: google.com
                                 Type: NS
                              */
@@ -212,9 +221,13 @@ public class Server {
                             synchronized (records) {
                                 String record = records.remove(name + " " + type);
 
-                                outToClient.writeBytes(record == null ?
+                                outToClient.writeBytes("Status: " +
+                                        (record == null ? "FAIL\n" : "OK\n")
+                                );
+
+                                outToClient.writeBytes("Response: " + (record == null ?
                                         "Record not found\n" :
-                                        "Record deleted successfully\n"
+                                        "Record deleted successfully\n")
                                 );
                             }
 
