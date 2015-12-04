@@ -11,7 +11,8 @@ import java.util.Iterator;
  */
 public class Manager {
 
-    public static final HashMap<String, Server> servers = new HashMap<>();
+    /** mapping the Record Type to the port number each server runs on */
+    public static final HashMap<String, Integer> servers = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public static void main(String[] argv) throws Exception {
@@ -22,7 +23,14 @@ public class Manager {
 
         // add one server for each type
         while ((type = in.readLine()) != null) {
-            servers.put(type, new Server());
+
+
+            Process process = Runtime.getRuntime().exec("java ../out/production/cse310final/Server");
+
+            // port number of each process
+            int port = 0;
+
+            servers.put(type, port);
         }
 
         // create a server socket (TCP)
@@ -47,7 +55,7 @@ public class Manager {
 
             type =  inFromClient.readLine().split(":\\s+")[1];
 
-            Server requestedServer = servers.get(type);
+            int requestedServer = servers.get(type);
 
         }
     }

@@ -271,7 +271,6 @@ public class Server {
     @SuppressWarnings("unchecked")
     public static void main(String[] argv) throws Exception {
 
-
         // create a server socket (TCP)
         ServerSocket welcomeSocket = new ServerSocket(0);
         System.out.println("Server is at port: " + welcomeSocket.getLocalPort());
