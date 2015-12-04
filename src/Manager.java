@@ -24,13 +24,19 @@ public class Manager {
         // add one server for each type
         while ((type = in.readLine()) != null) {
 
+            Process process = Runtime.getRuntime().exec("java Server2 " + type);
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()) );
 
-            Process process = Runtime.getRuntime().exec("java ../out/production/cse310final/Server");
+            // maybe should catch some errors later
+            int port = Integer.parseInt(reader.readLine());
 
-            // port number of each process
-            int port = 0;
+            System.out.println("Type - " + type + " running on port " + port);
 
             servers.put(type, port);
+
+            reader.close();
+
         }
 
         // create a server socket (TCP)
@@ -53,9 +59,11 @@ public class Manager {
             DataOutputStream outToClient =
                     new DataOutputStream(connectionSocket.getOutputStream());
 
-            type =  inFromClient.readLine().split(":\\s+")[1];
+            type = inFromClient.readLine().split(":\\s+")[1];
 
             int requestedServer = servers.get(type);
+
+            outToClient.write(requestedServer);
 
         }
     }

@@ -260,6 +260,9 @@ public class Server2 {
 
         // create a server socket (TCP)
         ServerSocket welcomeSocket = new ServerSocket(0);
+
+        // single line stdout of port for Manager to read
+        System.out.println(welcomeSocket.getLocalPort());
         System.out.println("Server is at port: " + welcomeSocket.getLocalPort());
         
         String line = null;
