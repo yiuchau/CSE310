@@ -61,9 +61,12 @@ public class Manager {
 
             type = inFromClient.readLine().split(":\\s+")[1];
 
+            System.out.println("Client requests " + type);
+
             int requestedServer = servers.get(type);
 
-            outToClient.write(requestedServer);
+            outToClient.writeBytes("Status: OK\n");
+            outToClient.writeBytes("Port: " + requestedServer + "\n");
 
         }
     }
