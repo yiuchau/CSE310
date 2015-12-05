@@ -14,6 +14,53 @@ public class Manager {
     /** mapping the Record Type to the port number each server runs on */
     public static final HashMap<String, Integer> servers = new HashMap<>();
 
+
+    public static class ManagerTCPSocket extends Thread {
+        private Socket connectionSocket;
+
+        public ManagerTCPSocket(Socket socket) {
+            this.connectionSocket = socket;
+        }
+
+        public void run() {
+
+            try {
+
+                String type;
+
+                //create an input stream from the socket input stream
+                BufferedReader inFromClient = new BufferedReader(
+                        new InputStreamReader(connectionSocket.getInputStream()));
+
+
+                // create an output stream from the socket output stream
+                DataOutputStream outToClient =
+                        new DataOutputStream(connectionSocket.getOutputStream());
+
+                String line;
+                while ((line = inFromClient.readLine() ) != null) {
+                    type = line.split(":\\s+")[1];
+
+                    System.out.println("Client requests " + type);
+
+                    if (servers.containsKey(type)) {
+                        int requestedServer = servers.get(type);
+
+                        outToClient.writeBytes("Status: OK\n");
+                        outToClient.writeBytes("Port: " + requestedServer + "\n");
+                    } else {
+                        outToClient.writeBytes("Status: FAIL\n");
+                        outToClient.writeBytes("Error: Invalid type!\n");
+                    }
+                }
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static void main(String[] argv) throws Exception {
 
@@ -43,31 +90,13 @@ public class Manager {
         ServerSocket welcomeSocket = new ServerSocket(0);
         System.out.println("Manager server is at port: " + welcomeSocket.getLocalPort());
 
-        String line = null;
-
         // loop infinitely (process clients sequentially)
         while (true) {
             // Wait and accept client connection
             Socket connectionSocket = welcomeSocket.accept();
 
-            //create an input stream from the socket input stream
-            BufferedReader inFromClient = new BufferedReader(
-                    new InputStreamReader(connectionSocket.getInputStream()));
 
-
-            // create an output stream from the socket output stream
-            DataOutputStream outToClient =
-                    new DataOutputStream(connectionSocket.getOutputStream());
-
-            type = inFromClient.readLine().split(":\\s+")[1];
-
-            System.out.println("Client requests " + type);
-
-            int requestedServer = servers.get(type);
-
-            outToClient.writeBytes("Status: OK\n");
-            outToClient.writeBytes("Port: " + requestedServer + "\n");
-
+            new ManagerTCPSocket(connectionSocket).start();
         }
     }
 }

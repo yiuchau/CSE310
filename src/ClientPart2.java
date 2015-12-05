@@ -177,8 +177,8 @@ class ClientPart2 {
             sentence = inFromUser.readLine();
             // Parse input string
             String[] tokens = sentence.split("[ ]+");
-//                    for (String token : tokens)
-//                        System.out.println(token);
+                    for (String token : tokens)
+                        System.out.println(token);
             // Process command according to protocol
             switch (tokens[0]) {
                 case "done":
