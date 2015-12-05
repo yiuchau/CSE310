@@ -169,7 +169,7 @@ class ClientPart2 {
         // indicating multiple lines needed
         boolean browse = false;
 
-        closed = false;
+        boolean closed = false;
 
         // Read in lines from input
         while (true) {
