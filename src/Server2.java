@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * Server
+ * Server for Part 2
  *
  * Request messages:
  * Method: PUT/GET/BROWSE/DEL/EXIT
@@ -26,6 +26,10 @@ import java.util.Iterator;
  * Response message:
  * Status: OK/FAIL
  * Response: 192.168.1.1 (value of record)
+ *
+ *
+ * Yiu Chau Lin - yiuchau.lin@stonybrook.edu
+ * Brian Yang - brian.yang@stonybrook.edu
  *
  */
 public class Server2 {
@@ -41,6 +45,9 @@ public class Server2 {
             this.socket = socket;
         }
 
+        /**
+         * The thread method for each connection
+         */
         public void run() {
 
             try {

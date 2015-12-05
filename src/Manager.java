@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
+ * Manager starts mutliple record servers and directs clients to the correct one
  *
+ * Yiu Chau Lin - yiuchau.lin@stonybrook.edu
+ * Brian Yang - brian.yang@stonybrook.edu
  */
 public class Manager {
 
@@ -22,6 +25,9 @@ public class Manager {
             this.connectionSocket = socket;
         }
 
+        /**
+         * The thread method for each connection
+         */
         public void run() {
 
             try {
@@ -42,6 +48,7 @@ public class Manager {
 
                     System.out.println("Received: " + methodName);
 
+                    // get the method name
                     methodName = methodName.split("\\s+")[1];
 
                     switch (methodName) {

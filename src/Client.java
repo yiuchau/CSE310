@@ -9,16 +9,15 @@ import java.net.*; // Provides the classes for implementing networking
 
 /**
  *
- * TCP Client
+ * TCP Client for Project Part 1
  *
- * Request messages:
- * Method: PUT/GET/BROWSE/DEL/EXIT
- * Name: test.com
- * Type: A/NS
+ * Request messages: Method: PUT/GET/BROWSE/DEL/EXIT Name: test.com Type: A/NS
  *
- * Response message:
- * Status: OK/FAIL
- * Response: 192.168.1.1 (value of record)
+ * Response message: Status: OK/FAIL Response: 192.168.1.1 (value of record)
+ *
+ * Yiu Chau Lin - yiuchau.lin@stonybrook.edu
+ * Brian Yang - brian.yang@stonybrook.edu
+ *
  */
 class Client {
         /** flag indicating whether a command is valid or not, connection is open or closed */
