@@ -121,6 +121,8 @@ class ClientPart2 {
                     case "type":
 
                         if (tokens.length == 2) {
+
+                            outToManager.writeBytes("Method: TYPE\r\n");
                             outToManager.writeBytes("Request: " + tokens[1] + "\r\n");
 
                             String responseCode = inFromManager.readLine().split(":\\s+")[1];

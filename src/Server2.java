@@ -53,7 +53,7 @@ public class Server2 {
                 DataOutputStream outToClient =
                         new DataOutputStream(socket.getOutputStream());
 
-                outToClient.writeBytes("Server is at port: " + socket.getLocalPort() + "\n");
+                outToClient.writeBytes("Server is at : " + socket.getRemoteSocketAddress().toString() + "\n");
 
                 String methodName, serverResponse;
 

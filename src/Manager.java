@@ -26,8 +26,6 @@ public class Manager {
 
             try {
 
-                String type;
-
                 //create an input stream from the socket input stream
                 BufferedReader inFromClient = new BufferedReader(
                         new InputStreamReader(connectionSocket.getInputStream()));
@@ -37,21 +35,42 @@ public class Manager {
                 DataOutputStream outToClient =
                         new DataOutputStream(connectionSocket.getOutputStream());
 
-                String line;
-                while ((line = inFromClient.readLine() ) != null) {
-                    type = line.split(":\\s+")[1];
+                String methodName;
+                boolean closed = false;
 
-                    System.out.println("Client requests " + type);
+                while (!closed && (methodName = inFromClient.readLine() ) != null) {
 
-                    if (servers.containsKey(type)) {
-                        int requestedServer = servers.get(type);
+                    System.out.println("Received: " + methodName);
 
-                        outToClient.writeBytes("Status: OK\n");
-                        outToClient.writeBytes("Port: " + requestedServer + "\n");
-                    } else {
-                        outToClient.writeBytes("Status: FAIL\n");
-                        outToClient.writeBytes("Error: Invalid type!\n");
+                    methodName = methodName.split("\\s+")[1];
+
+                    switch (methodName) {
+                        case "EXIT":
+                            System.out.println("Closing connection socket for client at Address:Port " +
+                                    connectionSocket.getRemoteSocketAddress().toString());
+
+                            connectionSocket.close();
+                            closed = true;
+                            break;
+
+                        case "TYPE":
+                            String type = inFromClient.readLine().split(":\\s+")[1];
+
+                            System.out.println("Client requests " + type);
+
+                            if (servers.containsKey(type)) {
+                                int requestedServer = servers.get(type);
+
+                                outToClient.writeBytes("Status: OK\n");
+                                outToClient.writeBytes("Port: " + requestedServer + "\n");
+                            } else {
+                                outToClient.writeBytes("Status: FAIL\n");
+                                outToClient.writeBytes("Error: Invalid type!\n");
+                            }
+                            break;
                     }
+
+
                 }
 
 
@@ -88,7 +107,7 @@ public class Manager {
 
         // create a server socket (TCP)
         ServerSocket welcomeSocket = new ServerSocket(0);
-        System.out.println("Manager server is at port: " + welcomeSocket.getLocalPort());
+        System.out.println("Manager server is at : " + welcomeSocket.getLocalPort());
 
         // loop infinitely (process clients sequentially)
         while (true) {
