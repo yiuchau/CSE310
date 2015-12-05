@@ -68,184 +68,188 @@ class Client {
                 // Create an input stream from the System.in
                 BufferedReader inFromUser = 
                 new BufferedReader(new InputStreamReader(System.in));
+                try {
+                    // Create a client socket (TCP) and connect to server
+                    Socket clientSocket = new Socket(argv[0], lisPort);
 
-                // Create a client socket (TCP) and connect to server
-                Socket clientSocket = new Socket(argv[0], lisPort);
+                    // Create an output stream from the socket output stream
+                    DataOutputStream outToServer =
+                            new DataOutputStream(clientSocket.getOutputStream());
 
-                // Create an output stream from the socket output stream
-                DataOutputStream outToServer = 
-                new DataOutputStream(clientSocket.getOutputStream()); 
+                    // Create an input stream from the socket input stream
+                    BufferedReader inFromServer = new BufferedReader(
+                            new InputStreamReader(clientSocket.getInputStream()));
 
-                // Create an input stream from the socket input stream
-                BufferedReader inFromServer = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream()));
+                    // indicating multiple lines needed
+                    boolean browse = false;
 
-                // indicating multiple lines needed
-                boolean browse = false;
-
-                // Read in lines from input
-                while (true){
-                    System.out.print("> ");
-                    sentence = inFromUser.readLine();
-                    // Parse input string
-                    String [] tokens = sentence.split("[ ]+");
+                    // Read in lines from input
+                    while (true){
+                        System.out.print("> ");
+                        sentence = inFromUser.readLine();
+                        // Parse input string
+                        String [] tokens = sentence.split("[ ]+");
 //                    for (String token : tokens)
 //                        System.out.println(token);
-                    // Process command according to protocol
-                    switch (tokens[0]){
-                        case "exit":
-                            // Write exit to server so the server closes the socket
-                            outToServer.writeBytes("Method: EXIT\r\n");
+                        // Process command according to protocol
+                        switch (tokens[0]){
+                            case "exit":
+                                // Write exit to server so the server closes the socket
+                                outToServer.writeBytes("Method: EXIT\r\n");
 
-                            // close the socket
-                            clientSocket.close();
-                            closed = true;
-                            break;
-                        case "put":
+                                // close the socket
+                                clientSocket.close();
+                                closed = true;
+                                break;
+                            case "put":
                         /*
-                            put: 
+                            put:
                             a. Three args: name, value, and type
                             b. Add name records to database, sent to server
                             c. Server records the new entry for name/type, or updates old entry
                         */
-                            if(tokens.length == 4){
-                                sentence =  "PUT " + tokens[1] + " " + tokens[2] + " " + tokens[3];
-                                
-                                // send the sentence read to the server
+                                if(tokens.length == 4){
+                                    sentence =  "PUT " + tokens[1] + " " + tokens[2] + " " + tokens[3];
+
+                                    // send the sentence read to the server
 //                                outToServer.writeBytes(sentence + "\r\n");
 
-                                outToServer.writeBytes("Method: PUT\n");
-                                outToServer.writeBytes("Name: " + tokens[1] + "\n");
-                                outToServer.writeBytes("Type: " + tokens[2] + "\n");
-                                outToServer.writeBytes("Value: " + tokens[3] + "\n");
-    
-                                // get the reply from the server
+                                    outToServer.writeBytes("Method: PUT\n");
+                                    outToServer.writeBytes("Name: " + tokens[1] + "\n");
+                                    outToServer.writeBytes("Type: " + tokens[2] + "\n");
+                                    outToServer.writeBytes("Value: " + tokens[3] + "\n");
+
+                                    // get the reply from the server
 //                                modifiedSentence = inFromServer.readLine();
 //
 //                                // print the returned sentence
 //                                System.out.println("FROM SERVER: " + modifiedSentence);
-                            }else
-                                printHelp();
+                                }else
+                                    printHelp();
 
-                            break;
-                        case "get":
+                                break;
+                            case "get":
                         /*
-                            get: 
+                            get:
                             a. Queries server database
                             b. Two arguments: name , type
                             c. Server returns record value if found
                             d. Returns not found error message if not found
                         */
-                            if(tokens.length == 3){
-                                sentence =  "GET " + tokens[1] + " " + tokens[2];
+                                if(tokens.length == 3){
+                                    sentence =  "GET " + tokens[1] + " " + tokens[2];
 
-                                outToServer.writeBytes("Method: GET\n");
-                                outToServer.writeBytes("Name: " + tokens[1] + "\n");
-                                outToServer.writeBytes("Type: " + tokens[2] + "\n");
-    
+                                    outToServer.writeBytes("Method: GET\n");
+                                    outToServer.writeBytes("Name: " + tokens[1] + "\n");
+                                    outToServer.writeBytes("Type: " + tokens[2] + "\n");
+
 //                                // Get the reply from the server
 //                                modifiedSentence = inFromServer.readLine();
 //
 //                                // Print the returned sentence
 //                                System.out.println("FROM SERVER: " + modifiedSentence);
-                            }else
-                                printHelp();
-                            break;
-                        
-                        case "browse":
+                                }else
+                                    printHelp();
+                                break;
+
+                            case "browse":
                         /*  browse:
                             a. No args
                             b. Retrieve all current name records in database
                             c. Returns all name and type fields of all records
                             d. If database is empty, return a database is empty error
                         */
-                            if(tokens.length == 1){
-                                sentence = "Method: BROWSE";
-                            int lineNumber = 1;
-                            // Send the sentence read to the server
-                            outToServer.writeBytes(sentence + "\r\n");
+                                if(tokens.length == 1){
+                                    sentence = "Method: BROWSE";
+                                    int lineNumber = 1;
+                                    // Send the sentence read to the server
+                                    outToServer.writeBytes(sentence + "\r\n");
 
-                            browse = true;
-    
-                            // Get the reply from the server
-                            // Print the returned sentence
+                                    browse = true;
+
+                                    // Get the reply from the server
+                                    // Print the returned sentence
 //                            System.out.println("FROM SERVER: ");
 //                            while(!(modifiedSentence = inFromServer.readLine()).equals("END")){
 //                                System.out.println(lineNumber + " " + modifiedSentence);
 //                                lineNumber++;
 //                            }
-                            } else
-                                printHelp();
-                            break;
+                                } else
+                                    printHelp();
+                                break;
 
-                        case "del":
+                            case "del":
                         /*  del:
                             a. Server removes a name record from database
                             b. Two arguments: name, type
                             c. If found, removes record and sends positive feedback
                             d. Returns not found error message otherwise
                         */
-                            if(tokens.length == 3){
-                                sentence =  "DEL " + tokens[1] + " " + tokens[2];
+                                if(tokens.length == 3){
+                                    sentence =  "DEL " + tokens[1] + " " + tokens[2];
 
-                                outToServer.writeBytes("Method: DEL\n");
-                                outToServer.writeBytes("Name: " + tokens[1] + "\n");
-                                outToServer.writeBytes("Type: " + tokens[2] + "\n");
-    
+                                    outToServer.writeBytes("Method: DEL\n");
+                                    outToServer.writeBytes("Name: " + tokens[1] + "\n");
+                                    outToServer.writeBytes("Type: " + tokens[2] + "\n");
+
 //                                // Get the reply from the server
 //                                modifiedSentence = inFromServer.readLine();
 //
 //                                // Print the returned sentence
 //                                System.out.println("FROM SERVER: " + modifiedSentence);
-                            }else
+                                }else
+                                    printHelp();
+                                break;
+                            default:
+                                //  Print list of supported commands, function, syntax
                                 printHelp();
+                        }
+
+                        if(closed){
+                            System.out.println("Connection with server terminated.\n");
                             break;
-                        default: 
-                        //  Print list of supported commands, function, syntax
-                        printHelp();
-                    }
+                        }
 
-                    if(closed){
-                        System.out.println("Connection with server terminated.\n");
-                        break;
-                    }
-                        
-                     
-                    // don't read response if there wasn't a good cmd to begin with
-                    if (validCmd) {
-                        String responseCode = inFromServer.readLine().split(":\\s+")[1];
 
-                        if (responseCode.equals("OK")) {
+                        // don't read response if there wasn't a good cmd to begin with
+                        if (validCmd) {
+                            String responseCode = inFromServer.readLine().split(":\\s+")[1];
 
-                            if (browse) {
-                                int lines = Integer.parseInt(inFromServer.readLine().split(":\\s+")[1]);
+                            if (responseCode.equals("OK")) {
 
-                                for (int i = 0; i < lines; i++) {
-                                    System.out.println(i + " - " + inFromServer.readLine());
+                                if (browse) {
+                                    int lines = Integer.parseInt(inFromServer.readLine().split(":\\s+")[1]);
+
+                                    for (int i = 0; i < lines; i++) {
+                                        System.out.println(i + " - " + inFromServer.readLine());
+                                    }
+
+                                    // reset browse flag
+                                    browse = false;
+
+                                } else {
+                                    String response = inFromServer.readLine().split(":\\s+")[1];
+                                    System.out.println("Response - " + response);
                                 }
-
-                                // reset browse flag
-                                browse = false;
-
                             } else {
-                                String response = inFromServer.readLine().split(":\\s+")[1];
-                                System.out.println("Response - " + response);
+                                String errorMessage = inFromServer.readLine().split(":\\s+")[1];
+                                System.out.println("Error - " + errorMessage);
                             }
                         } else {
-                            String errorMessage = inFromServer.readLine().split(":\\s+")[1];
-                            System.out.println("Error - " + errorMessage);
+                            validCmd = true;
                         }
-                    } else {
-                        validCmd = true;
+
+
+                        // newline for readability
+                        System.out.println();
+
+
+
                     }
-
-
-                    // newline for readability
-                    System.out.println();
-                    
-                   
-                    
+                } catch (ConnectException e) {
+                    System.out.println("Error connecting to server. The hostname and/or port number is correct.");
                 }
+
                 
         }
 }
