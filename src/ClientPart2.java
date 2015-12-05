@@ -83,59 +83,66 @@ class ClientPart2 {
         BufferedReader inFromUser
                 = new BufferedReader(new InputStreamReader(System.in));
 
-        // Create a client socket (TCP) and connect to manager
-        Socket clientSocket = new Socket(managerAddress, lisPort);
 
-        // Create an output stream from the socket output stream
-        DataOutputStream outToManager
-                = new DataOutputStream(clientSocket.getOutputStream());
+        try {
+            // Create a client socket (TCP) and connect to manager
+            Socket clientSocket = new Socket(managerAddress, lisPort);
 
-        // Create an input stream from the socket input stream
-        BufferedReader inFromManager = new BufferedReader(
-                new InputStreamReader(clientSocket.getInputStream()));
 
-        while (true) {
-            System.out.print("Enter type to access: \n>");
-            toManager = inFromUser.readLine();
+            // Create an output stream from the socket output stream
+            DataOutputStream outToManager
+                    = new DataOutputStream(clientSocket.getOutputStream());
 
-            String[] tokens = toManager.split("[ ]+");
+            // Create an input stream from the socket input stream
+            BufferedReader inFromManager = new BufferedReader(
+                    new InputStreamReader(clientSocket.getInputStream()));
 
-            switch (tokens[0]) {
-                case "exit":
-                    // Write exit to server so the server closes the socket
-                    outToManager.writeBytes("Method: EXIT\r\n");
 
-                    // close the socket
-                    clientSocket.close();
-                    closed = true;
-                    break;
-                case "type":
+            while (true) {
+                System.out.print("Enter type to access: \n>");
+                toManager = inFromUser.readLine();
 
-                    if (tokens.length == 2) {
-                        outToManager.writeBytes("Request: " + tokens[1] + "\r\n");
+                String[] tokens = toManager.split("[ ]+");
 
-                        String responseCode = inFromManager.readLine().split(":\\s+")[1];
+                switch (tokens[0]) {
+                    case "exit":
+                        // Write exit to server so the server closes the socket
+                        outToManager.writeBytes("Method: EXIT\r\n");
 
-                        if (responseCode.equals("OK")) {
-                            String response = inFromManager.readLine().split(":\\s+")[1];
-                            System.out.println("Response - Server of type " + toManager + "is at port " + response);
-                            connectServer(argv[0], response);
+                        // close the socket
+                        clientSocket.close();
+                        closed = true;
+                        break;
+                    case "type":
 
-                        } else {
-                            String errorMessage = inFromManager.readLine().split(":\\s+")[1];
-                            System.out.println("Error - " + errorMessage);
+                        if (tokens.length == 2) {
+                            outToManager.writeBytes("Request: " + tokens[1] + "\r\n");
+
+                            String responseCode = inFromManager.readLine().split(":\\s+")[1];
+
+                            if (responseCode.equals("OK")) {
+                                String response = inFromManager.readLine().split(":\\s+")[1];
+                                System.out.println("Response - Server of type " + toManager + " is at port " + response);
+                                connectServer(argv[0], response);
+
+                            } else {
+                                String errorMessage = inFromManager.readLine().split(":\\s+")[1];
+                                System.out.println("Error - " + errorMessage);
+                            }
                         }
-                    }
+                        break;
+                    default:
+                          managerHelp();
+                }
+
+                if (closed) {
+                    System.out.println("Connection with server terminated.\n");
                     break;
-                default:
-                      managerHelp();
-            }
+                }
 
-            if (closed) {
-                System.out.println("Connection with server terminated.\n");
-                break;
             }
-
+        } catch (ConnectException e) {
+            System.out.println("Error connecting to server. The hostname and/or port number is correct.");
         }
     }
 
@@ -165,6 +172,9 @@ class ClientPart2 {
         // Create an input stream from the socket input stream
         BufferedReader inFromServer = new BufferedReader(
                 new InputStreamReader(clientSocket2.getInputStream()));
+
+        // display welcome and port
+        System.out.println("Successfully connected - " + inFromServer.readLine());
 
         // indicating multiple lines needed
         boolean browse = false;
