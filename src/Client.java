@@ -33,6 +33,11 @@ class Client {
                             "help:\n" +  
                             "\ta. No arguments\n" +
                             "\tb. Prints list of support commands and required syntax.\n" +
+                            "get:\n" + 
+                            "\ta. Queries server database\n" + 
+                            "\tb. Two arguments: name , type\n" + 
+                            "\tc. Server returns record value if found\n" +
+                            "\td. Returns not found error message if not found\n" +
                             "put:\n" +
                             "\ta. Three arguments: Name, Type, and Value\n" +
                             "\tb. Add name records to database, sent to server\n" +
